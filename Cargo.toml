@@ -1,0 +1,21 @@
+[package]
+name = "samsung-tv-rs"
+version = "0.1.0"
+authors = ["Insidious Fiddler <rust@codycody31.dev>"]
+edition = "2021"
+description = "A Rust library for interacting with Samsung Smart TVs via their API."
+license = "MIT"
+repository = "https://github.com/Codycody31/samsung-tv-rs"
+homepage = "https://github.com/Codycody31/samsung-tv-rs"
+keywords = ["samsung", "tv", "api", "remote", "rust"]
+readme = "README.md"
+
+[lib]
+name = "samsung_tv_rs"
+crate-type = ["lib"]
+
+[dependencies]
+reqwest = { version = "0.11", features = ["json"] }
+serde = { version = "1.0", features = ["derive"] }
+tokio = { version = "1", features = ["full"] }
+serde_json = "1.0"
