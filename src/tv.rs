@@ -1,8 +1,14 @@
 use crate::commands::Command;
-use reqwest::Client;
 use serde::Deserialize;
+use serde_json::json;
 use std::collections::HashMap;
-use std::error::Error;
+use std::net::TcpStream;
+use std::time::Duration;
+use tokio::time::sleep;
+use tungstenite::stream::MaybeTlsStream;
+use tungstenite::{connect, Message, Utf8Bytes, WebSocket};
+use tungstenite::handshake::client::Response;
+use url::Url;
 
 #[derive(Debug, Deserialize)]
 pub struct DeviceInfo {
@@ -64,23 +70,50 @@ where
 }
 
 pub struct SamsungTV {
-    pub ip: String,
-    pub port: u16,
-    pub api_version: String,
-    pub client: Client,
+    socket: WebSocket<MaybeTlsStream<TcpStream>>,
+    response: Response,
+    key_interval: Duration,
+    client: reqwest::Client,
+    ip: String,
+    port: u16,
+    api_version: String,
 }
 
 impl SamsungTV {
-    pub fn new(ip: &str, port: u16, api_version: &str) -> Self {
-        SamsungTV {
-            ip: ip.to_string(),
+    const URL_FORMAT: &'static str =
+        "ws://{host}:{port}/api/v2/channels/samsung.remote.control?name={name}";
+
+    pub async fn new(
+        host: &str,
+        port: u16,
+        name: &str,
+        api_version: &str,
+    ) -> Result<Self, Box<dyn std::error::Error>> {
+        let url = Self::build_url(host, port, name)?;
+        let (mut socket, response) = connect(url.to_string())?;
+
+        Ok(Self {
+            socket,
+            response,
+            key_interval: Duration::from_secs_f32(1.5),
+            client: reqwest::Client::new(),
+            ip: host.to_string(),
             port,
             api_version: api_version.to_string(),
-            client: Client::new(),
-        }
+        })
     }
 
-    pub async fn get_info(&self) -> Result<TVInfo, Box<dyn Error>> {
+    fn build_url(host: &str, port: u16, name: &str) -> Result<Url, url::ParseError> {
+        let encoded_name = base64::encode(name);
+        let url = Self::URL_FORMAT
+            .replace("{host}", host)
+            .replace("{port}", &port.to_string())
+            .replace("{name}", &encoded_name);
+        Url::parse(&url)
+    }
+
+
+    pub async fn get_info(&self) -> Result<TVInfo, Box<dyn std::error::Error>> {
         let url = format!("http://{}:{}/api/{}/", self.ip, self.port, self.api_version);
 
         let response = self
@@ -95,37 +128,45 @@ impl SamsungTV {
         Ok(response)
     }
 
-    pub async fn send_command(&self, command: Command) -> Result<(), Box<dyn Error>> {
-        let url = format!(
-            "http://{}:{}/api/{}/channels/samsung.remote.control",
-            self.ip, self.port, self.api_version
-        );
+    pub async fn send_command(
+        &mut self,
+        command: Command,
+        repeat: usize,
+    ) -> Result<Vec<Utf8Bytes>, Box<dyn std::error::Error>> {
+        let mut responses = Vec::new();
 
-        let payload = CommandPayload {
-            method: "ms.remote.control".to_string(),
-            params: CommandParams {
-                Cmd: "Click".to_string(),
-                DataOfCmd: command.as_str().to_string(),
-                Option: "false".to_string(),
-                TypeOfRemote: "SendRemoteKey".to_string(),
-            },
-        };
+        for _ in 0..repeat {
+            let payload = json!({
+                "method": "ms.remote.control",
+                "params": {
+                    "Cmd": "Click",
+                    "DataOfCmd": command.as_str().to_string(),
+                    "Option": "false",
+                    "TypeOfRemote": "SendRemoteKey"
+                }
+            });
 
-        let response = self
-            .client
-            .post(&url)
-            .json(&payload)
-            .send()
-            .await?
-            .error_for_status()?;
+            self.socket
+                .write(Message::Text(Utf8Bytes::from(payload.to_string())))?;
 
-        println!(
-            "Sent command '{}' to Samsung TV at {}:{}",
-            command.as_str(),
-            self.ip,
-            self.port
-        );
-        Ok(())
+            // Wait for a response
+            if let Ok(msg) = self.socket.read_message() {
+                if let Message::Text(text) = msg {
+                    responses.push(text);
+                }
+            }
+
+            sleep(self.key_interval).await;
+        }
+        Ok(responses)
+    }
+}
+
+impl Drop for SamsungTV {
+    fn drop(&mut self) {
+        if let Err(err) = self.socket.close(None) {
+            eprintln!("Error closing connection: {:?}", err);
+        }
     }
 }
 

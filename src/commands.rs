@@ -6,6 +6,7 @@ pub enum Command {
     KeyVolDown,
     KeyMute,
     KeyPower,
+    KeyHome,
     // Add other commands here
 }
 
@@ -16,6 +17,7 @@ impl Command {
             Command::KeyVolDown => "KEY_VOLDOWN",
             Command::KeyMute => "KEY_MUTE",
             Command::KeyPower => "KEY_POWER",
+            Command::KeyHome => "KEY_HOME",
         }
     }
 }
@@ -27,5 +29,6 @@ impl Commands {
     pub const KEY_VOLDOWN: Command = Command::KeyVolDown;
     pub const KEY_MUTE: Command = Command::KeyMute;
     pub const KEY_POWER: Command = Command::KeyPower;
+    pub const KEY_HOME: Command = Command::KeyHome;
     // Add other commands here
 }
