@@ -15,7 +15,7 @@
 //! # Quick Start
 //!
 //! ```no_run
-//! use samsung_tv_rs::{SamsungTV, SamsungTvConfig, Key};
+//! use samsung_tv::{SamsungTV, SamsungTvConfig, Key};
 //! use std::path::PathBuf;
 //!
 //! #[tokio::main]
@@ -35,7 +35,7 @@
 //!     tv.send_key(Key::Home).await?;
 //!
 //!     // Launch an app
-//!     tv.launch_app(samsung_tv_rs::app_ids::NETFLIX).await?;
+//!     tv.launch_app(samsung_tv::app_ids::NETFLIX).await?;
 //!
 //!     Ok(())
 //! }
@@ -64,7 +64,7 @@ mod error;
 // Primary exports
 pub use client::{DeviceInfo, SamsungTV, TvInfo};
 pub use commands::{CommandType, Key, RemoteCommand};
-pub use config::{SamsungTvConfig, DEFAULT_WS_PORT, DEFAULT_WSS_PORT};
+pub use config::{SamsungTvConfig, DEFAULT_WSS_PORT, DEFAULT_WS_PORT};
 pub use error::{Result, SamsungTvError};
 
 // App-related exports

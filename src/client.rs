@@ -62,7 +62,9 @@ pub struct TvInfo {
     pub version: String,
 }
 
-fn deserialize_support_info<'de, D>(deserializer: D) -> std::result::Result<HashMap<String, String>, D::Error>
+fn deserialize_support_info<'de, D>(
+    deserializer: D,
+) -> std::result::Result<HashMap<String, String>, D::Error>
 where
     D: serde::Deserializer<'de>,
 {
@@ -77,7 +79,7 @@ where
 /// # Example
 ///
 /// ```no_run
-/// use samsung_tv_rs::{SamsungTV, SamsungTvConfig, Key};
+/// use samsung_tv::{SamsungTV, SamsungTvConfig, Key};
 ///
 /// #[tokio::main]
 /// async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -165,10 +167,7 @@ impl SamsungTV {
     /// Note: The HTTP API is always on port 8001, regardless of WebSocket port.
     pub async fn get_info(&self) -> Result<TvInfo> {
         // HTTP API is always on port 8001 (not 8002 which is WebSocket-only)
-        let url = format!(
-            "http://{}:8001/api/v2/",
-            self.config.host
-        );
+        let url = format!("http://{}:8001/api/v2/", self.config.host);
 
         let response = self
             .http_client
@@ -445,10 +444,7 @@ impl SamsungTV {
         name: &str,
         _api_version: &str,
     ) -> std::result::Result<Self, Box<dyn std::error::Error + Send + Sync>> {
-        let config = SamsungTvConfig::new(host)
-            .port(port)
-            .name(name)
-            .build();
+        let config = SamsungTvConfig::new(host).port(port).name(name).build();
 
         Self::connect(config)
             .await
@@ -467,9 +463,9 @@ impl SamsungTV {
         let mut responses = Vec::new();
 
         for _ in 0..repeat {
-            self.send_key(key).await.map_err(|e| {
-                Box::new(e) as Box<dyn std::error::Error + Send + Sync>
-            })?;
+            self.send_key(key)
+                .await
+                .map_err(|e| Box::new(e) as Box<dyn std::error::Error + Send + Sync>)?;
 
             responses.push(String::new());
             sleep(self.config.key_delay).await;

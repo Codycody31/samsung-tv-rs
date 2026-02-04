@@ -5,7 +5,7 @@
 //!
 //! On first connection, you'll need to accept the pairing request on your TV.
 
-use samsung_tv_rs::{Key, SamsungTV, SamsungTvConfig};
+use samsung_tv::{Key, SamsungTV, SamsungTvConfig};
 use std::env;
 use std::path::PathBuf;
 use std::time::Duration;

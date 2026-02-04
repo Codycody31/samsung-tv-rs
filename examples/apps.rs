@@ -7,7 +7,7 @@
 //!   cargo run --example apps -- 192.168.1.100           # List all apps
 //!   cargo run --example apps -- 192.168.1.100 netflix   # Launch Netflix
 
-use samsung_tv_rs::{app_ids, SamsungTV, SamsungTvConfig};
+use samsung_tv::{app_ids, SamsungTV, SamsungTvConfig};
 use std::env;
 use std::path::PathBuf;
 use std::time::Duration;

@@ -5,7 +5,7 @@
 //!
 //! This will scan the local network for Samsung TVs using SSDP.
 
-use samsung_tv_rs::discovery::{discover, DiscoveryOptions};
+use samsung_tv::discovery::{discover, DiscoveryOptions};
 use std::time::Duration;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -30,7 +30,15 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     for (i, tv) in tvs.iter().enumerate() {
         println!("{}. {}", i + 1, tv.ip);
-        println!("   Port: {} ({})", tv.port, if tv.supports_tls { "secure" } else { "insecure" });
+        println!(
+            "   Port: {} ({})",
+            tv.port,
+            if tv.supports_tls {
+                "secure"
+            } else {
+                "insecure"
+            }
+        );
 
         if let Some(name) = &tv.name {
             println!("   Name: {}", name);
@@ -58,10 +66,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     for tv in &tvs {
         if tv.supports_tls {
-            println!(
-                "let config = SamsungTvConfig::new(\"{}\").secure();",
-                tv.ip
-            );
+            println!("let config = SamsungTvConfig::new(\"{}\").secure();", tv.ip);
         } else {
             println!("let config = SamsungTvConfig::new(\"{}\");", tv.ip);
         }

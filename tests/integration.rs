@@ -3,12 +3,12 @@
 //! Note: These tests require a real Samsung TV on the network.
 //! They are ignored by default - run with `cargo test -- --ignored` to execute.
 
-use samsung_tv_rs::{Key, SamsungTvConfig};
+use samsung_tv::{Key, SamsungTvConfig};
 
 /// Test discovery functionality - scans local network for Samsung TVs.
 #[test]
 fn test_discovery() {
-    use samsung_tv_rs::discovery::{discover, DiscoveryOptions};
+    use samsung_tv::discovery::{discover, DiscoveryOptions};
     use std::time::Duration;
 
     println!("\n=== Samsung TV Discovery ===\n");
@@ -112,7 +112,7 @@ fn test_key_codes() {
 
 #[test]
 fn test_remote_command_serialization() {
-    use samsung_tv_rs::RemoteCommand;
+    use samsung_tv::RemoteCommand;
 
     let cmd = RemoteCommand::click(Key::VolumeUp);
     let payload = cmd.to_payload();

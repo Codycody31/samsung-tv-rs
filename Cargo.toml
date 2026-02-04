@@ -11,7 +11,7 @@ keywords = ["samsung", "tv", "api", "remote", "rust"]
 readme = "README.md"
 
 [lib]
-name = "samsung_tv_rs"
+name = "samsung_tv"
 crate-type = ["lib"]
 
 [dependencies]

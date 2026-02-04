@@ -105,7 +105,7 @@ impl DiscoveryOptions {
 /// # Example
 ///
 /// ```no_run
-/// use samsung_tv_rs::discovery::{discover, DiscoveryOptions};
+/// use samsung_tv::discovery::{discover, DiscoveryOptions};
 /// use std::time::Duration;
 ///
 /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -176,7 +176,9 @@ pub fn discover(options: DiscoveryOptions) -> Result<Vec<DiscoveredTv>> {
                 if is_samsung_tv(&response) {
                     let ip = addr.ip().to_string();
 
-                    if let std::collections::hash_map::Entry::Vacant(e) = discovered.entry(ip.clone()) {
+                    if let std::collections::hash_map::Entry::Vacant(e) =
+                        discovered.entry(ip.clone())
+                    {
                         let mut tv = DiscoveredTv::new(ip);
                         parse_ssdp_response(&response, &mut tv);
 
@@ -312,7 +314,9 @@ fn check_tls_support(ip: &str) -> bool {
 
     let addr = format!("{}:8002", ip);
     TcpStream::connect_timeout(
-        &addr.parse().unwrap_or_else(|_| SocketAddr::V4(SocketAddrV4::new(Ipv4Addr::LOCALHOST, 8002))),
+        &addr
+            .parse()
+            .unwrap_or_else(|_| SocketAddr::V4(SocketAddrV4::new(Ipv4Addr::LOCALHOST, 8002))),
         Duration::from_millis(500),
     )
     .is_ok()

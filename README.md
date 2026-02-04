@@ -24,7 +24,7 @@ tokio = { version = "1", features = ["full"] }
 ## Quick Start
 
 ```rust
-use samsung_tv_rs::{SamsungTV, SamsungTvConfig, Key};
+use samsung_tv::{SamsungTV, SamsungTvConfig, Key};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -41,7 +41,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     tv.send_key(Key::Home).await?;
 
     // Launch an app
-    tv.launch_app(samsung_tv_rs::app_ids::NETFLIX).await?;
+    tv.launch_app(samsung_tv::app_ids::NETFLIX).await?;
 
     tv.disconnect().await?;
     Ok(())
@@ -53,7 +53,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 Find Samsung TVs on your network without knowing their IP:
 
 ```rust
-use samsung_tv_rs::discovery::{discover, DiscoveryOptions};
+use samsung_tv::discovery::{discover, DiscoveryOptions};
 use std::time::Duration;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -114,7 +114,7 @@ The `Key` enum includes 100+ remote control keys:
 Launch popular streaming apps:
 
 ```rust
-use samsung_tv_rs::app_ids;
+use samsung_tv::app_ids;
 
 // Launch by app ID constant
 tv.launch_app(app_ids::NETFLIX).await?;
