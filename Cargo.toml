@@ -5,8 +5,8 @@ authors = ["Insidious Fiddler <rust@codycody31.dev>"]
 edition = "2021"
 description = "A Rust library for interacting with Samsung Smart TVs via their API."
 license = "MIT"
-repository = "https://github.com/Codycody31/samsung-tv-rs"
-homepage = "https://github.com/Codycody31/samsung-tv-rs"
+repository = "https://git.macco.dev/insidiousfiddler/samsung-tv-rs"
+homepage = "https://git.macco.dev/insidiousfiddler/samsung-tv-rs"
 keywords = ["samsung", "tv", "api", "remote", "rust"]
 readme = "README.md"
 
