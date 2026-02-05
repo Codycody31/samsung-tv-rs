@@ -1,7 +1,7 @@
 [package]
 name = "samsung-tv"
 version = "0.1.0"
-authors = ["Insidious Fiddler <rust@codycody31.dev>"]
+authors = ["Insidious Fiddler <me@codycody31.dev>"]
 edition = "2021"
 description = "A Rust library for interacting with Samsung Smart TVs via their API."
 license = "MIT"
