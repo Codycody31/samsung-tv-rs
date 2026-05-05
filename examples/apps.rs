@@ -1,11 +1,12 @@
 //! App control example: List and launch apps on a Samsung TV.
 //!
 //! Usage:
-//!   cargo run --example apps -- <TV_IP_ADDRESS> [APP_NAME]
+//!   cargo run --example apps -- <TV_IP_ADDRESS> [APP_NAME] [URL]
 //!
 //! Examples:
-//!   cargo run --example apps -- 192.168.1.100           # List all apps
-//!   cargo run --example apps -- 192.168.1.100 netflix   # Launch Netflix
+//!   cargo run --example apps -- 192.168.1.100                              # List all apps
+//!   cargo run --example apps -- 192.168.1.100 netflix                      # Launch Netflix
+//!   cargo run --example apps -- 192.168.1.100 browser https://example.com  # Open URL
 
 use samsung_tv::{app_ids, SamsungTV, SamsungTvConfig};
 use std::env;
@@ -60,8 +61,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             tv.launch_app(app_ids::PLEX).await?;
         }
         Some("browser") => {
-            println!("Opening web browser...");
-            tv.open_browser("https://www.google.com").await?;
+            let url = args
+                .get(3)
+                .map(|s| s.as_str())
+                .unwrap_or("https://www.google.com");
+            println!("Opening {} in web browser...", url);
+            tv.open_browser(url).await?;
         }
         Some(name) => {
             println!("Unknown app '{}'. Trying to list installed apps...\n", name);

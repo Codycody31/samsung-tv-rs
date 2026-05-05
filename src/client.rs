@@ -388,8 +388,15 @@ impl SamsungTV {
     }
 
     /// Opens a URL in the TV's web browser.
+    ///
+    /// Sends `KEY_EXIT` first to bail out of any currently running app —
+    /// without this, launching the browser is a no-op on most Tizen versions
+    /// when a streaming app is in the foreground.
     pub async fn open_browser(&mut self, url: &str) -> Result<()> {
-        let payload = BrowserPayload::open(url);
+        self.send_key(Key::Exit).await?;
+        sleep(Duration::from_millis(500)).await;
+
+        let payload = BrowserPayload::open_browser(url);
         self.connection
             .send(&serde_json::to_string(&payload)?)
             .await?;

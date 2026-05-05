@@ -37,6 +37,7 @@ pub(crate) struct AppLaunchPayload {
 #[derive(Debug, Serialize)]
 pub(crate) struct AppLaunchParams {
     pub event: &'static str,
+    pub to: &'static str,
     pub data: AppLaunchData,
 }
 
@@ -45,7 +46,7 @@ pub(crate) struct AppLaunchData {
     #[serde(rename = "appId")]
     pub app_id: String,
     pub action_type: &'static str,
-    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(rename = "metaTag", skip_serializing_if = "Option::is_none")]
     pub meta_tag: Option<String>,
 }
 
@@ -56,6 +57,7 @@ impl AppLaunchPayload {
             method: "ms.channel.emit",
             params: AppLaunchParams {
                 event: "ed.apps.launch",
+                to: "host",
                 data: AppLaunchData {
                     app_id: app_id.to_string(),
                     action_type: "DEEP_LINK",
@@ -71,6 +73,7 @@ impl AppLaunchPayload {
             method: "ms.channel.emit",
             params: AppLaunchParams {
                 event: "ed.apps.launch",
+                to: "host",
                 data: AppLaunchData {
                     app_id: app_id.to_string(),
                     action_type: "DEEP_LINK",
@@ -110,33 +113,27 @@ impl AppListPayload {
     }
 }
 
+/// Tizen browser app ID — used to open URLs on the TV.
+const TIZEN_BROWSER_APP_ID: &str = "org.tizen.browser";
+
 /// Payload for opening the web browser.
-#[derive(Debug, Serialize)]
-pub(crate) struct BrowserPayload {
-    pub method: &'static str,
-    pub params: BrowserParams,
-}
+///
+/// Opening the browser is just launching the Tizen browser app with the
+/// target URL passed as `metaTag` and `NATIVE_LAUNCH` as the action type.
+pub(crate) type BrowserPayload = AppLaunchPayload;
 
-#[derive(Debug, Serialize)]
-pub(crate) struct BrowserParams {
-    pub event: &'static str,
-    pub data: BrowserData,
-}
-
-#[derive(Debug, Serialize)]
-pub(crate) struct BrowserData {
-    pub url: String,
-}
-
-impl BrowserPayload {
+impl AppLaunchPayload {
     /// Creates a payload to open a URL in the TV's web browser.
-    pub fn open(url: &str) -> Self {
+    pub fn open_browser(url: &str) -> Self {
         Self {
             method: "ms.channel.emit",
-            params: BrowserParams {
+            params: AppLaunchParams {
                 event: "ed.apps.launch",
-                data: BrowserData {
-                    url: url.to_string(),
+                to: "host",
+                data: AppLaunchData {
+                    app_id: TIZEN_BROWSER_APP_ID.to_string(),
+                    action_type: "NATIVE_LAUNCH",
+                    meta_tag: Some(url.to_string()),
                 },
             },
         }
@@ -202,9 +199,21 @@ mod tests {
 
     #[test]
     fn test_browser_payload() {
-        let payload = BrowserPayload::open("https://example.com");
+        let payload = AppLaunchPayload::open_browser("https://example.com");
         let json = serde_json::to_string(&payload).unwrap();
 
         assert!(json.contains("https://example.com"));
+        assert!(json.contains("org.tizen.browser"));
+        assert!(json.contains("NATIVE_LAUNCH"));
+        assert!(json.contains("metaTag"));
+    }
+
+    #[test]
+    fn test_app_launch_with_meta_uses_camel_case() {
+        let payload = AppLaunchPayload::launch_with_meta("YouTube", "video_id=abc123");
+        let json = serde_json::to_string(&payload).unwrap();
+
+        assert!(json.contains("metaTag"));
+        assert!(!json.contains("meta_tag"));
     }
 }
